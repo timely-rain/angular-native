@@ -75,18 +75,12 @@
         this.default = {
             /**
              * 默认抽象状态
-             * @param {object} options 配置
-             * @description
-             * - statePrefix    前缀
-             * - module         模块名
              */
             transformAbstractState: function (options) {
-                return '{statePrefix}.{module}'
-                    .replace(/{statePrefix}/, options.statePrefix)
-                    .replace(/{module}/, options.module);
+                return router.template(options.templateAbstractState, options);
             },
             /**
-             * 默认抽象配置
+             * 默认抽象状态配置
              */
             transformAbstractStateOptions: function (options) {
                 return {
@@ -104,22 +98,18 @@
             },
             /**
              * 默认状态
-             * @param {object} options 配置
-             * @description
-             * - statePrefix    前缀
-             * - module         模块名
-             * - action         行为
              */
             transformState: function (options) {
                 return router.template(options.templateState, options);
             },
             /**
-             * 状态配置
+             * 默认状态配置
              */
             transformStateOptions: function (opts) {
                 return {
                     url: opts.transformUrl(opts),
                     templateUrl: opts.transformTemplateUrl(opts),
+                    control: opts.transformControllerName(opts),
                     resolve: opts.transformResolve(opts)
                 };
             },
@@ -135,7 +125,6 @@
             },
             /**
              * 默认路径
-             * @param options
              */
             transformUrl: function (options) {
                 switch (options.action) {
@@ -153,8 +142,13 @@
                 return router.template(options.templateHtml, options);
             },
             /**
+             * 默认控制器名称
+             */
+            transformControllerName: function (options) {
+                return router.template(options.templateControllerName, options);
+            },
+            /**
              * 默认预加载项
-             * @param options
              */
             transformResolve: function (options) {
                 return {
@@ -178,16 +172,19 @@
          * - templateHtml
          * - templateService
          * - templateController
+         * - templateControllerName
          * - actions
          */
         this.defaultOptions = ng.extend({
             abstract: true,
             statePrefix: iConfig.ROUTER_STATE_PREFIX,
             templateResource: iConfig.ROUTER_TEMPLATE_RESOURCE,
+            templateAbstractState: iConfig.ROUTER_TEMPLATE_ABSTRACT_STATE,
             templateState: iConfig.ROUTER_TEMPLATE_STATE,
             templateHtml: iConfig.ROUTER_TEMPLATE_HTML,
             templateService: iConfig.ROUTER_TEMPLATE_SERVICE,
             templateController: iConfig.ROUTER_TEMPLATE_CONTROLLER,
+            templateControllerName: iConfig.ROUTER_TEMPLATE_CONTROLLER_NAME,
             actions: iConfig.ROUTE_ACTIONS
         }, this.default);
         /**
@@ -241,19 +238,8 @@
                 .replace(/{module}/g, opts.module)
                 .replace(/{action}/, opts.action);
         };
-        this.stateOptions = function (opts) {
-            return {
-                url: opts.transformUrl(opts),
-                templateUrl: opts.transformTemplateUrl(opts),
-                resolve: opts.transformResolve(opts)
-            };
-        };
         this.config = function (options) {
         };
-    }
-
-    function State() {
-
     }
 
     /**
