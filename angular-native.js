@@ -247,11 +247,11 @@
      * @constructor
      */
     function Path() {
-        this.get = function (opts) {
-            var options = ng.extend({name: 'resource', url: ''}, opts);
-            switch (name) {
+        this.get = function (options) {
+            var opts = ng.extend({name: 'resource', url: '', prefix: ''}, options);
+            switch (opts.name) {
                 default:
-                    return options.url;
+                    return opts.url;
             }
         };
         /**
@@ -259,14 +259,14 @@
          * @param url
          */
         this.resource = function (url) {
-            return this.get('resource', url);
+            return this.get({url: url});
         };
         /**
          * 请求路径
          * @param url
          */
-        this.request = function (url) {
-            return this.get('url', url);
+        this.api = function (url) {
+            return this.get({name: 'api', url: url});
         };
     }
 })(window.angular, window.APPLICATION_CONFIG);
