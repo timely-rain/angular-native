@@ -6,6 +6,7 @@
  * @since ECMAScript5
  */
 (function (ng, CONFIG) {
+    'use strict';
     window.iConfig = ng.extend({
         // MAIN_MODULE: 'app', // Angular主模块名称
         // WELCOME_STATE: 'system.user.list', // 欢迎页, 登录后
@@ -109,7 +110,8 @@
                 return {
                     url: opts.transformUrl(opts),
                     templateUrl: opts.transformTemplateUrl(opts),
-                    control: opts.transformControllerName(opts),
+                    controller: opts.transformControllerName(opts),
+                    controllerAs: opts.transformControllerAlias(opts),
                     resolve: opts.transformResolve(opts)
                 };
             },
@@ -146,6 +148,12 @@
              */
             transformControllerName: function (options) {
                 return router.template(options.templateControllerName, options);
+            },
+            /**
+             * 默认控制器别名
+             */
+            transformControllerAlias: function (options) {
+                return options.templateControllerAlias;
             },
             /**
              * 默认预加载项
@@ -185,6 +193,7 @@
             templateService: iConfig.ROUTER_TEMPLATE_SERVICE,
             templateController: iConfig.ROUTER_TEMPLATE_CONTROLLER,
             templateControllerName: iConfig.ROUTER_TEMPLATE_CONTROLLER_NAME,
+            templateControllerAlias: iConfig.ROUTER_TEMPLATE_CONTROLLER_ALIAS,
             actions: iConfig.ROUTE_ACTIONS
         }, this.default);
         /**
@@ -224,7 +233,7 @@
             provider.state(state, stateOptions);
         };
         this.debugState = function (state, opts) {
-            console.log('state:' + state);
+            console.log('register state:' + state);
             console.log(opts);
         };
         /**
