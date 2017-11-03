@@ -7,17 +7,12 @@
  */
 (function (ng, CONFIG) {
     'use strict';
-    window.iConfig = ng.extend({
-        // MAIN_MODULE: 'app', // Angular主模块名称
-        // WELCOME_STATE: 'system.user.list', // 欢迎页, 登录后
-        // ROUTER_STATE_PREFIX: 'app', // 路由状态前缀
-        // ROUTER_TEMPLATE_RESOURCE: 'app/{module}', // 路由资源模板
-        // ROUTER_TEMPLATE_STATE: '{statePrefix}.{module}.{action}', // 路由状态模板
-        // ROUTER_TEMPLATE_HTML: '{resource}/{module}-{action}.html', // 路由状态模板
-        // ROUTER_TEMPLATE_SERVICE: '{resource}/{module}-service.js', // 路由服务模板
-        // ROUTER_TEMPLATE_CONTROLLER: '{resource}/{module}-{action}.js', // 路由控制器模板
-        // ROUTE_ACTIONS: ['add', 'edit', 'list'] // 路由注册行为
-    }, CONFIG);
+    /**
+     * 配置
+     * @type {Config}
+     */
+    window.iConfig = new Config(CONFIG);
+
     /**
      * 模块
      * @type {Module}
@@ -41,6 +36,32 @@
      * @type {Application}
      */
     window.iApp = new Application();
+
+    /**
+     * 配置
+     * @constructor
+     */
+    function Config(settings) {
+        var config = this;
+        this.config = function (settings) {
+            ng.extend(config, settings);
+        };
+        this.config({
+            MAIN_MODULE: 'app', // Angular主模块名称
+            WELCOME_STATE: 'system.user.list', // 欢迎页
+            ROUTER_STATE_PREFIX: 'app', // 路由状态前缀
+            ROUTER_TEMPLATE_RESOURCE: 'app/modules/{module}', // 路由资源模板
+            ROUTER_TEMPLATE_ABSTRACT_STATE: '{statePrefix}.{module}', // 路由抽象状态模板
+            ROUTER_TEMPLATE_STATE: '{statePrefix}.{module}.{action}', // 路由状态模板
+            ROUTER_TEMPLATE_HTML: '{resource}/{module}-{action}.html', // 路由状态模板
+            ROUTER_TEMPLATE_SERVICE: '{resource}/{module}-service.js', // 路由服务模板
+            ROUTER_TEMPLATE_CONTROLLER: '{resource}/{module}-{action}.js', // 路由控制器模板
+            ROUTER_TEMPLATE_CONTROLLER_NAME: '{module}.{action}.ctrl', // 路由控制器名称模板
+            ROUTER_TEMPLATE_CONTROLLER_ALIAS: 'vm', // 路由控制器别名
+            ROUTE_ACTIONS: ['add', 'edit', 'list'] // 路由注册行为
+        });
+        settings && this.config(settings);
+    }
 
     /**
      * 应用
@@ -73,7 +94,7 @@
          * 默认的
          * @type {[string,string,string]}
          */
-        this.default = {
+        router.default = {
             /**
              * 默认抽象状态
              */
@@ -183,7 +204,7 @@
          * - templateControllerName
          * - actions
          */
-        this.defaultOptions = ng.extend({
+        router.defaultOptions = ng.extend({
             abstract: true,
             statePrefix: iConfig.ROUTER_STATE_PREFIX,
             templateResource: iConfig.ROUTER_TEMPLATE_RESOURCE,
@@ -195,12 +216,12 @@
             templateControllerName: iConfig.ROUTER_TEMPLATE_CONTROLLER_NAME,
             templateControllerAlias: iConfig.ROUTER_TEMPLATE_CONTROLLER_ALIAS,
             actions: iConfig.ROUTE_ACTIONS
-        }, this.default);
+        }, router.default);
         /**
          * 注册模块(多个状态)
          * @param options
          */
-        this.module = function (options) {
+        router.module = function (options) {
             var opts = ng.extend(this.defaultOptions, options);
             if (!options.provider) new Error('{provider:$stateProvider} is null');
             var actions = opts.transformActions(opts);
@@ -214,7 +235,7 @@
          * 注册抽象状态
          * @param opts
          */
-        this.abstractState = function (opts) {
+        router.abstractState = function (opts) {
             var state = opts.transformAbstractState(opts);
             var provider = opts.provider;
             var stateOptions = opts.transformAbstractStateOptions(opts);
@@ -225,14 +246,14 @@
          * 注册状态
          * @param opts
          */
-        this.state = function (opts) {
+        router.state = function (opts) {
             var state = opts.transformState(opts);
             var provider = opts.provider;
             var stateOptions = opts.transformStateOptions(opts);
             this.debugState(state, stateOptions);
             provider.state(state, stateOptions);
         };
-        this.debugState = function (state, opts) {
+        router.debugState = function (state, opts) {
             console.log('register state:' + state);
             console.log(opts);
         };
@@ -241,14 +262,13 @@
          * @param template
          * @param opts
          */
-        this.template = function (template, opts) {
+        router.template = function (template, opts) {
             return template.replace(/{resource}/, opts.templateResource)
                 .replace(/{statePrefix}/, opts.statePrefix)
                 .replace(/{module}/g, opts.module)
                 .replace(/{action}/, opts.action);
         };
-        this.config = function (options) {
-        };
+        router.config = iConfig.config;
     }
 
     /**
