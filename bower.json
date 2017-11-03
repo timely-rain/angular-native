@@ -1,0 +1,23 @@
+{
+  "name": "angular-native",
+  "version": "0.1.0",
+  "main": "angular-native.js",
+  "homepage": "https://github.com/timely-rain/angular-native",
+  "authors": [
+    "timely-rain <lolic_sd@hotmail.com>"
+  ],
+  "description": "使用原生JS增强Angular",
+  "keywords": [
+    "Angular",
+    "AngularJS",
+    "angular-native"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
