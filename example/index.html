@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="UTF-8">
+    <title>示例</title>
+    <script src="https://cdn.bootcss.com/angular.js/1.6.6/angular.js"></script>
+    <script src="https://cdn.bootcss.com/angular-ui-router/1.0.3/angular-ui-router.js"></script>
+    <script src="../angular-native.js"></script>
+</head>
+<body>
+<script>
+    (function (ng) {
+        ng.module(iConfig.MAIN_MODULE, ['ui.router'])
+            .config(['$stateProvider', function ($stateProvider) {
+                iRouter.config({ROUTER_PROVIDER: $stateProvider});
+                iRouter.module('user');
+            }]);
+    })(window.angular);
+</script>
+</body>
+</html>

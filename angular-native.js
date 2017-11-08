@@ -59,7 +59,10 @@
             ROUTER_TEMPLATE_CONTROLLER: '{resource}/{module}-{action}.js', // 路由控制器模板
             ROUTER_TEMPLATE_CONTROLLER_NAME: '{module}.{action}.ctrl', // 路由控制器名称模板
             ROUTER_TEMPLATE_CONTROLLER_ALIAS: 'vm', // 路由控制器别名
-            ROUTE_ACTIONS: ['add', 'edit', 'list'] // 路由注册行为
+            ROUTE_ACTIONS: ['add', 'edit', 'detail', 'list'], // 路由注册行为
+            ROUTE_ACTIONS_OPTIONS: { // 路由注册行为配置
+                add: {html: 'edit'}, edit: {}, detail: {html: 'edit'}, list: {}
+            }
         });
         settings && this.config(settings);
     }
@@ -227,6 +230,7 @@
          * @param options
          */
         router.module = function (options) {
+            if (ng.isString(options)) options = {module: options};
             var opts = ng.extend(this.defaultOptions(), options);
             if (!opts.provider) console.error(('{provider:$stateProvider} is null'));
             var actions = opts.transformActions(opts);
