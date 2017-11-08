@@ -48,7 +48,8 @@
         };
         this.config({
             MAIN_MODULE: 'app', // Angular主模块名称
-            WELCOME_STATE: 'system.user.list', // 欢迎页
+            WELCOME_STATE: '', // 欢迎页
+            ROUTER_PROVIDER: null, // 路由提供者
             ROUTER_STATE_PREFIX: 'app', // 路由状态前缀
             ROUTER_TEMPLATE_RESOURCE: 'app/modules/{module}', // 路由资源模板
             ROUTER_TEMPLATE_ABSTRACT_STATE: '{statePrefix}.{module}', // 路由抽象状态模板
@@ -195,6 +196,7 @@
          * @type {Object}
          * @description
          * - abstract 是否创建抽象父状态
+         * - provider 路由提供者
          * - statePrefix 状态前缀
          * - templateResource
          * - templateState
@@ -204,26 +206,29 @@
          * - templateControllerName
          * - actions
          */
-        router.defaultOptions = ng.extend({
-            abstract: true,
-            statePrefix: iConfig.ROUTER_STATE_PREFIX,
-            templateResource: iConfig.ROUTER_TEMPLATE_RESOURCE,
-            templateAbstractState: iConfig.ROUTER_TEMPLATE_ABSTRACT_STATE,
-            templateState: iConfig.ROUTER_TEMPLATE_STATE,
-            templateHtml: iConfig.ROUTER_TEMPLATE_HTML,
-            templateService: iConfig.ROUTER_TEMPLATE_SERVICE,
-            templateController: iConfig.ROUTER_TEMPLATE_CONTROLLER,
-            templateControllerName: iConfig.ROUTER_TEMPLATE_CONTROLLER_NAME,
-            templateControllerAlias: iConfig.ROUTER_TEMPLATE_CONTROLLER_ALIAS,
-            actions: iConfig.ROUTE_ACTIONS
-        }, router.default);
+        router.defaultOptions = function () {
+            return ng.extend({
+                abstract: true,
+                provider: iConfig.ROUTER_PROVIDER,
+                statePrefix: iConfig.ROUTER_STATE_PREFIX,
+                templateResource: iConfig.ROUTER_TEMPLATE_RESOURCE,
+                templateAbstractState: iConfig.ROUTER_TEMPLATE_ABSTRACT_STATE,
+                templateState: iConfig.ROUTER_TEMPLATE_STATE,
+                templateHtml: iConfig.ROUTER_TEMPLATE_HTML,
+                templateService: iConfig.ROUTER_TEMPLATE_SERVICE,
+                templateController: iConfig.ROUTER_TEMPLATE_CONTROLLER,
+                templateControllerName: iConfig.ROUTER_TEMPLATE_CONTROLLER_NAME,
+                templateControllerAlias: iConfig.ROUTER_TEMPLATE_CONTROLLER_ALIAS,
+                actions: iConfig.ROUTE_ACTIONS
+            }, router.default);
+        };
         /**
          * 注册模块(多个状态)
          * @param options
          */
         router.module = function (options) {
-            var opts = ng.extend(this.defaultOptions, options);
-            if (!options.provider) new Error('{provider:$stateProvider} is null');
+            var opts = ng.extend(this.defaultOptions(), options);
+            if (!opts.provider) console.error(('{provider:$stateProvider} is null'));
             var actions = opts.transformActions(opts);
             if (opts.abstract) this.abstractState(opts);
             for (var i in actions) {
@@ -254,8 +259,9 @@
             provider.state(state, stateOptions);
         };
         router.debugState = function (state, opts) {
-            console.log('register state:' + state);
-            console.log(opts);
+            console.group('注册状态:' + state);
+            console.debug(opts);
+            console.groupEnd();
         };
         /**
          * 模板解析
