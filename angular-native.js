@@ -37,6 +37,8 @@
      */
     window.iApp = new Application();
 
+    window.iHttp = new Http();
+
     /**
      * 配置
      * @constructor
@@ -263,9 +265,11 @@
             provider.state(state, stateOptions);
         };
         router.debugState = function (state, opts) {
-            console.group('注册状态:' + state);
-            console.debug(opts);
-            console.groupEnd();
+            if (ng.isDefined(console) && ng.isDefined(console.group) && ng.isDefined(console.debug)) {
+                console.group('注册状态:' + state);
+                console.debug(opts);
+                console.groupEnd();
+            }
         };
         /**
          * 模板解析
@@ -307,5 +311,52 @@
         this.api = function (url) {
             return this.get({name: 'api', url: url});
         };
+    }
+
+    /**
+     * 网络
+     * @constructor
+     */
+    function Http() {
+
+        this.request = request;
+
+        this.contentType = contentType;
+
+        function request(entry) {
+            return new Request(entry || 'request');
+        }
+
+        function contentType(entry) {
+            return request(entry || 'headers').contentType();
+        }
+    }
+
+    /**
+     * 请求头
+     * @constructor
+     */
+    function Request(entry) {
+        var request = this;
+        this.entry = entry || 'request';
+        this.headers = [];
+
+        this.contentType = contentType;
+
+        function contentType(value) {
+            var name = 'Content-Type';
+            switch (value) {
+                case 'json':
+                    request.headers.push(name, 'application/json');
+                    break;
+                case 'form':
+                    request.headers.push(name, 'application/x-www-form-urlencoded');
+                    break;
+                case 'form-data':
+                    request.headers.push(name, 'multipart/form-data');
+                    break;
+            }
+            return request.headers;
+        }
     }
 })(window.angular, window.APPLICATION_CONFIG);
