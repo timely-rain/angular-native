@@ -188,6 +188,14 @@
              * 默认预加载项
              */
             transformResolve: function (options) {
+                options.resolve = options.resolve || {};
+                var actionOptions = options.actionOptions;
+                var loads = [router.template(options.templateController, options)];
+                if (options.loads) loads = loads.concat(options.loads);
+                if (actionOptions && actionOptions.loads) loads = loads.concat(actionOptions.loads);
+                var deps = options.deps || ['$ocLazyLoad', 'uiLoad', function ($ocLazyLoad, uiLoad) {
+                    return $ocLazyLoad.load(loads);
+                }];
                 return {
                     module: function () {
                         return {
@@ -195,12 +203,7 @@
                             action: options.action
                         }
                     },
-                    deps: ['$ocLazyLoad',
-                        function ($ocLazyLoad) {
-                            return $ocLazyLoad.load([
-                                router.template(options.templateController, options)
-                            ]);
-                        }]
+                    deps: deps
                 };
             }
         };
@@ -246,7 +249,8 @@
             var actions = opts.transformActions(opts);
             if (opts.abstract) this.abstractState(opts);
             for (var i in actions) {
-                var actionOpts = ng.extend({action: actions[i]}, opts);
+                var action = actions[i];
+                var actionOpts = ng.extend({action: action, actionOptions: opts[action]}, opts);
                 this.state(actionOpts);
             }
         };

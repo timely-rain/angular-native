@@ -65,7 +65,7 @@
         var vm = this;
 
         this.model = {}; // 数据模型
-        this.models = {}; // 数据模型数组
+        this.models = []; // 数据模型数组
 
         this.get = get; // 获取
         this.remove = remove; // 删除
