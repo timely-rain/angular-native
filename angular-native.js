@@ -39,6 +39,8 @@
 
     window.iHttp = new Http();
 
+    window.iUtil = new Util();
+
     /**
      * 配置
      * @constructor
@@ -187,6 +189,12 @@
              */
             transformResolve: function (options) {
                 return {
+                    module: function () {
+                        return {
+                            name: options.module,
+                            action: options.action
+                        }
+                    },
                     deps: ['$ocLazyLoad',
                         function ($ocLazyLoad) {
                             return $ocLazyLoad.load([
@@ -344,6 +352,7 @@
         this.contentType = contentType;
 
         function contentType(value) {
+            if (!value) return;
             var name = 'Content-Type';
             switch (value) {
                 case 'json':
@@ -355,8 +364,56 @@
                 case 'form-data':
                     request.headers.push(name, 'multipart/form-data');
                     break;
+                default:
+                    request.headers.push(name, value);
+                    break;
             }
             return request.headers;
+        }
+    }
+
+    /**
+     * 工具
+     * @constructor
+     */
+    function Util() {
+        var util = this;
+        // 包含
+        this.contains = contains;
+        // 首字母大写
+        this.upperCaseFirst = upperCaseFirst;
+        // 驼峰命名
+        this.camelCase = camelCase;
+
+        /**
+         * 包含
+         */
+        function contains(s, token) {
+            return s.indexOf(token) !== -1;
+        }
+
+        /**
+         * 首字母大写
+         */
+        function upperCaseFirst(s) {
+            return s.substring(0, 1).toUpperCase() + s.substring(1, s.length).toUpperCase();
+        }
+
+        /**
+         * 驼峰命名
+         */
+        function camelCase(s, token) {
+            token = /[-_]/ || token;
+            if (contains(s, token)) {
+                var string = '';
+                var splits = s.split(token);
+                for (var i in splits) {
+                    var split = splits[i];
+                    string += util.camelCase(split, token);
+                }
+                return string;
+            }
+            return upperCaseFirst(s);
         }
     }
 })(window.angular, window.APPLICATION_CONFIG);
