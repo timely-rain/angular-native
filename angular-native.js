@@ -37,9 +37,23 @@
      */
     window.iApp = new Application();
 
+    /**
+     * 网络
+     * @type {Http}
+     */
     window.iHttp = new Http();
 
+    /**
+     * 工具
+     * @type {Util}
+     */
     window.iUtil = new Util();
+
+    /**
+     * 日期
+     * @type {Moment}
+     */
+    window.iMoment = new Moment();
 
     /**
      * 配置
@@ -141,11 +155,12 @@
                     templateUrl: opts.transformTemplateUrl(opts),
                     controller: opts.transformControllerName(opts),
                     controllerAs: opts.transformControllerAlias(opts),
-                    resolve: opts.transformResolve(opts)
+                    resolve: suitableOptions(opts, 'transformResolve')(opts)
+                    // opts.transformResolve(opts)
                 };
             },
             transformActions: function (options) {
-                return options.actions;
+                return iUtil.adder(options.actions, options.actionsAdder);
             },
             /**
              * 默认行为
@@ -158,12 +173,17 @@
              * 默认路径
              */
             transformUrl: function (options) {
+                var params = suitableOptions(options, 'params') || [];
+                var url = '/' + options.action;
                 switch (options.action) {
                     case 'edit':
-                        return '/' + options.action + '/:id';
-                    default:
-                        return '/' + options.action;
+                        url += '/:id';
                 }
+                for (var i in params) {
+                    var param = params[i];
+                    url += '/:' + param;
+                }
+                return url;
             },
             /**
              * 默认模板路径
@@ -193,7 +213,7 @@
                 var loads = [router.template(options.templateController, options)];
                 if (options.loads) loads = loads.concat(options.loads);
                 if (actionOptions && actionOptions.loads) loads = loads.concat(actionOptions.loads);
-                var deps = options.deps || ['$ocLazyLoad', 'uiLoad', function ($ocLazyLoad, uiLoad) {
+                var deps = suitableOptions(options, 'deps') || ['$ocLazyLoad', 'uiLoad', function ($ocLazyLoad, uiLoad) {
                     return $ocLazyLoad.load(loads);
                 }];
                 return {
@@ -295,6 +315,19 @@
                 .replace(/{action}/, opts.action);
         };
         router.config = iConfig.config;
+
+        /**
+         * 获取最适合的配置项
+         * @param name 配置名称
+         * @param options 全部配置项
+         * @returns {*}
+         */
+        function suitableOptions(options, name) {
+            var actionOptions = options.actionOptions;
+            if (actionOptions && actionOptions[name])
+                return actionOptions[name];
+            return options[name];
+        }
     }
 
     /**
@@ -382,25 +415,28 @@
      */
     function Util() {
         var util = this;
-        // 包含
-        this.contains = contains;
-        // 首字母大写
-        this.upperCaseFirst = upperCaseFirst;
+        // 日期格式化 moment.js
+        this.FORMAT_MOMENT_MINUTE = 'YYYY-MM-DD HH:mm'; // 分
+        // 并入
+        this.adder = adder;
         // 驼峰命名
         this.camelCase = camelCase;
+        // 包含
+        this.contains = contains;
+        // 开头
+        this.startsWith = startsWith;
+        // 查找对象
+        this.findObject = findObject;
+        // 首字母大写
+        this.upperCaseFirst = upperCaseFirst;
 
         /**
-         * 包含
+         * 增加
          */
-        function contains(s, token) {
-            return s.indexOf(token) !== -1;
-        }
-
-        /**
-         * 首字母大写
-         */
-        function upperCaseFirst(s) {
-            return s.substring(0, 1).toUpperCase() + s.substring(1, s.length).toUpperCase();
+        function adder(source, target) {
+            source = source || [];
+            target = target || [];
+            return source.concat(target);
         }
 
         /**
@@ -419,5 +455,78 @@
             }
             return upperCaseFirst(s);
         }
+
+        /**
+         * 包含
+         */
+        function contains(s, token) {
+            return s.indexOf(token) !== -1;
+        }
+
+        function findObject(objectOrArray, value, name) {
+            var key = 'value' || name;
+            for (var i in objectOrArray) {
+                var o = objectOrArray[i];
+                if (o[key] === value) return o;
+            }
+            return null;
+        }
+
+        /**
+         * 判断是否以token开头
+         * @param s
+         * @param token
+         * @returns {boolean}
+         */
+        function startsWith(s, token) {
+            return s.indexOf(token) === 0;
+        }
+
+        /**
+         * 首字母大写
+         */
+        function upperCaseFirst(s) {
+            return s.substring(0, 1).toUpperCase() + s.substring(1, s.length);
+        }
+    }
+
+    /**
+     * 日期
+     * @constructor
+     */
+    function Moment() {
+        // 将moment修正为中国时间
+        this.momentCN = momentCN;
+        // 一周的开始(中国从周一开始)
+        this.startOfWeekCN = startOfWeekCN;
+        // 一周的结束(中国在周日结束)
+        this.endOfWeekCN = endOfWeekCN;
+
+        /**
+         * 将moment修正为中国时间
+         * @param moment moment.js
+         */
+        function momentCN(moment) {
+            var zone = moment.zone();
+            if (zone !== -480) {
+                return moment.subtract(zone + 480, 'minutes').zone(-8);
+            }
+            return moment.zone(-8);
+        }
+
+        /**
+         * 一周的开始(中国从周一开始)
+         */
+        function startOfWeekCN(moment) {
+            return moment.startOf('week').add(1, 'days');
+        }
+
+        /**
+         * 一周的结束(中国在周日结束)
+         */
+        function endOfWeekCN(moment) {
+            return moment.endOf('week').add(1, 'days');
+        }
+
     }
 })(window.angular, window.APPLICATION_CONFIG);
